@@ -1,4 +1,6 @@
 #include "client.hpp"
+atomic_bool userIsLogin;
+sem_t acksem;
 
 int main(int argc, char **argv)
 {
@@ -35,6 +37,12 @@ int main(int argc, char **argv)
         close(clientfd);
         exit(-1);
     }
+    //初始化信号量
+    sem_init(&acksem,0,0);
+    userIsLogin=false;
+    //启动接收线程
+    thread readthread(readTaskHandler, clientfd);
+    readthread.detach();
 
     for (;;)
     {
@@ -47,7 +55,7 @@ int main(int argc, char **argv)
         cout << "choice:";
         int choice = 0;
         cin >> choice;
-        cin.get(); // 读掉缓冲区残留的回车
+        //cin.get(); // 读掉缓冲区残留的回车
 
         switch (choice)
         {
@@ -63,11 +71,12 @@ int main(int argc, char **argv)
         break;
         case 3: // quit业务
             close(clientfd);
+            sem_destroy(&acksem);
             exit(0);
         default:
             cerr << "invalid input!" << endl;
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cin.clear();    //清除错误状态
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');   //清除输入缓冲区
             break;
         }
     }

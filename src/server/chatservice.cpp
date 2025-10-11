@@ -127,7 +127,7 @@ void ChatService::login(const TcpConnectionPtr &conn, json &js, Timestamp time)
     {
         // 密码错误
         json resp;
-        resp["msgid"] = REG_MSG_ACK;
+        resp["msgid"] = LOGIN_MSG_ACK;
         resp["errno"] = 1; // 表示注册失败
         resp["errmsg"] = "the id or the password is error";
         conn->send(resp.dump()); // 回应

@@ -24,7 +24,8 @@ using json = nlohmann::json;
 #include "group.hpp"
 #include "user.hpp"
 #include "public.hpp"
-
+#include <semaphore.h>
+#include <atomic>
 // 记录当前系统登录的用户信息
 extern User currentUser;
 // 记录当前登录用户的好友列表信息
@@ -36,7 +37,12 @@ extern unordered_map<string, string> commandMap;
 //客户端命令处理函数
 extern unordered_map<string, function<void(int, string)>> commandHandlerMap;
 
-extern bool userIsLogin;
+extern atomic_bool userIsLogin;
+
+//读写线程通信的信号量
+extern sem_t acksem;
+
+
 // 显示当前登录成功用户的基本信息
 void showCurrentUserData();
 
@@ -47,9 +53,12 @@ void readTaskHandler(int clientfd);
 
 // 客户端登录业务
 void login(int& clientfd);
-
+//loginReation处理服务器发回来的登录响应
+void loginReaction(json response);
 //客户端注册业务
 void reg(int& clientfd);
+
+void regReation(json );
 //获取系统时间
 string getCurrentTime();
 
